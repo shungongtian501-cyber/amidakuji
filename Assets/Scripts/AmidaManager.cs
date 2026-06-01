@@ -6,6 +6,10 @@ using UnityEngine.SceneManagement;
 
 public class AmidaManager : MonoBehaviour
 {
+    [SerializeField]
+    private float obstacleHitRadius = 25f;
+
+
     private float startY;
     [SerializeField]
     private GameObject retryButton;
@@ -87,10 +91,11 @@ public class AmidaManager : MonoBehaviour
 
     private bool isGameOver = false;
 
+    private bool isStarted = false;
+
     [SerializeField]
     private float drawDistance = 30f;
 
-    private Vector2 lastMousePosition;
 
     private Vector2 startDrawPosition;
 
@@ -114,12 +119,15 @@ public class AmidaManager : MonoBehaviour
     [SerializeField]
     private AudioClip goalSE;
 
-    private bool isMoving = false;
 
     private List<GameObject> spawnedLines = new List<GameObject>();  
 
     private Dictionary<int, List<int>> horizontalLines = new Dictionary<int, List<int>>();
 
+    private Vector2 lastMousePosition;
+    private bool isMoving = false;
+
+    //=====unity=====
     void Start()
     {
         Random.InitState(System.DateTime.Now.Millisecond);
@@ -138,9 +146,20 @@ public class AmidaManager : MonoBehaviour
     }
     void Update()
     {
-        if (isGameOver) return;
+        if (isGameOver)
+        {
+            return;
+        }
 
+        // スタート前は完全停止
+        if (!isStarted)
+        {
+            return;
+        }
+
+        // ↓開始後だけ
         HandleDrawInput();
+
         CheckObstacleCollision();
 
         if (state == MoveState.Fall)
@@ -151,14 +170,58 @@ public class AmidaManager : MonoBehaviour
         {
             MoveHorizontal();
         }
+
         UpdateScroll();
-
         CheckGenerateRows();
-
         UpdateScore();
-
         UpdateDifficulty();
     }
+    //=====ゲーム開始、終了=====
+    public void StartGame(int index)
+    {
+        playerMarker.anchoredPosition =
+            startButtons[index]
+            .anchoredPosition;
+
+        startY =
+            playerMarker
+            .anchoredPosition.y;
+
+        isStarted = true;
+
+        isDrawing = false;
+        previewLine.gameObject.SetActive(false);
+
+        Debug.Log("開始 " + index);
+    }
+    public void Retry()
+    {
+        Time.timeScale = 1f;
+
+        SceneManager.LoadScene(
+            SceneManager.GetActiveScene().name
+        );
+    }
+    public void BackToTitle()
+    {
+        Time.timeScale = 1f;
+
+        SceneManager.LoadScene(
+            "TitleScene"
+        );
+    }
+    void GameOver()
+    {
+        isGameOver = true;
+
+        resultText.text =
+            "GAME OVER\n" + "SCORE :" + score;
+
+        retryButton.SetActive(true);
+
+        Time.timeScale = 0f;
+    }
+   //=====プレイヤー移動=====
     void MoveDown()
     {
         if (state != MoveState.Fall) return;
@@ -337,18 +400,6 @@ public class AmidaManager : MonoBehaviour
         yield return new WaitForSeconds(0.25f);
         currentLine = null;
     }
-
-    void CreateLineInput()
-    {
-        lineTimer += Time.deltaTime;
-
-        if (Input.GetMouseButton(0)&& lineTimer >= lineCreateInterval)
-        {
-            lineTimer = 0f;
-
-            CreatePlayerLine();
-        }
-    }
     void CreatePlayerLine()
     {
         GameObject line =
@@ -363,8 +414,13 @@ public class AmidaManager : MonoBehaviour
 
         spawnedLines.Add(line);
     }
+    //=====線描画=====
     void HandleDrawInput()
     {
+        if (!isStarted)
+        {
+            return;
+        }
         if (Input.GetMouseButtonDown(0))
         {
             RectTransformUtility
@@ -443,44 +499,61 @@ public class AmidaManager : MonoBehaviour
                 out endPos
             );
 
+        // 少ししか動かしてないなら作らない
+        if (Vector2.Distance(startPos, endPos) < 30f)
+        {
+            return;
+        }
+
         // 縦線開始位置
         float startX =
             -((lineCount - 1)
             * xSpacing) / 2f;
 
-        // どの縦線付近で描き始めたか
+        // 一番近い縦線に吸着
         int lineIndex =
             Mathf.RoundToInt(
                 (startPos.x - startX)
                 / xSpacing
             );
 
-        // 範囲制限
         lineIndex = Mathf.Clamp(
             lineIndex,
             0,
             lineCount - 2
         );
 
-        // 隣の縦線位置
+        // 開始位置を縦線に固定
+        float snappedStartX =
+            startX
+            + lineIndex * xSpacing;
+
+        startPos.x =
+            snappedStartX;
+
+        // 左右の行き先
         float leftX =
-            startX + lineIndex * xSpacing;
+            startX
+            + lineIndex * xSpacing;
 
         float rightX =
-            startX + (lineIndex + 1)
+            startX
+            + (lineIndex + 1)
             * xSpacing;
 
-        // 左右判定
         bool drawRight =
             endPos.x > startPos.x;
 
         float finalX =
-            drawRight ? rightX : leftX;
+            drawRight
+            ? rightX
+            : leftX;
 
         // 線の中心
         Vector2 center =
             new Vector2(
-                (startPos.x + finalX) / 2f,
+                (startPos.x + finalX)
+                / 2f,
                 startPos.y
             );
 
@@ -497,46 +570,20 @@ public class AmidaManager : MonoBehaviour
         rect.anchoredPosition =
             center;
 
-        // 長さを固定
-        float length =
-            Mathf.Abs(
-                finalX - startPos.x
-            );
-
+        // 長さ固定
         rect.sizeDelta =
             new Vector2(
-                length,
+                Mathf.Abs(
+                    finalX
+                    - startPos.x
+                ),
                 rect.sizeDelta.y
             );
 
         spawnedLines.Add(line);
     }
-    void DrawLine()
-    {
-        Vector2 mousePos =Input.mousePosition;
-
-        if (Vector2.Distance(mousePos,lastMousePosition) < drawDistance)
-        {
-            return;
-        }
-
-        Vector2 localPoint;
-
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(parentUI,mousePos, null, out localPoint);
-
-        GameObject line =
-            Instantiate(horizontalLinePrehub,parentUI);
-
-        RectTransform rect =line.GetComponent<RectTransform>();
-
-        rect.anchoredPosition =localPoint;
-
-        rect.sizeDelta = new Vector2(50f,rect.sizeDelta.y);
-
-        spawnedLines.Add(line);
-
-        lastMousePosition =mousePos;
-    }
+    //=====障害物=====
+    
     void CreateObstacle(
     RectTransform lineRect)
     {
@@ -585,13 +632,14 @@ public class AmidaManager : MonoBehaviour
                     playerMarker.anchoredPosition,
                     obstacle.anchoredPosition);
 
-            if (distance < 40f)
+            if (distance < obstacleHitRadius)
             {
                 GameOver();
                 return;
             }
         }
     }
+    //=====ステージ作成=====
     void CheckGenerateRows()
     {
         int playerRow =
@@ -704,13 +752,13 @@ public class AmidaManager : MonoBehaviour
             rect.anchoredPosition =
                 new Vector2(
                     startX + i * xSpacing,
-                    -1200f
+                    -7200f
                 );
 
             rect.sizeDelta =
                 new Vector2(
                     rect.sizeDelta.x,
-                    3000f
+                    15000f
                 );
 
             Debug.Log(
@@ -720,7 +768,117 @@ public class AmidaManager : MonoBehaviour
             );
         }
     }
+    //=====UI更新=====
+    void UpdateScroll()
+    {
+        float targetY =
+            Mathf.Max(
+                0,
+                -playerMarker.anchoredPosition.y
+                - followOffset
+            );
 
+        Vector2 targetPos =
+            scrollTarget.anchoredPosition;
+
+        targetPos.y =
+            Mathf.Lerp(
+                scrollTarget.anchoredPosition.y,
+                targetY,
+                scrollSpeed
+                * Time.deltaTime
+            );
+
+        scrollTarget.anchoredPosition =
+            targetPos;
+    }
+
+
+    void UpdateScore()
+    {
+        float distance =
+            startY
+            - playerMarker
+            .anchoredPosition.y;
+
+        score =
+            Mathf.Max(
+                score,
+                Mathf.FloorToInt(
+                    distance / 10f
+                )
+            );
+
+        scoreText.text =
+            "SCORE : "
+            + score;
+    }
+    void UpdateDifficulty()
+    {
+        fallSpeed =
+            200f
+            + generatedRows * 0.5f;
+    }
+   
+    //=====レイアウト補助=====
+    void AdjustSpacing()
+    {
+        float width =parentUI.rect.width;
+
+        float margin = 100f;
+
+        xSpacing =(width - margin)/ (lineCount - 1);
+
+        ySpacing = 80f;
+    }
+
+    void ArrangeButtons()
+    {
+        float startX = -((lineCount  - 1) * xSpacing) / 2f;
+        for (int i = 0;i < startButtons.Length;i++)
+        {
+            startButtons[i].anchoredPosition =new Vector2(startX + i * xSpacing, rowCount * ySpacing);
+        }
+    }
+
+    // ===== 旧システム（保留）=====
+    void CreateLineInput()
+    {
+        lineTimer += Time.deltaTime;
+
+        if (Input.GetMouseButton(0) && lineTimer >= lineCreateInterval)
+        {
+            lineTimer = 0f;
+
+            CreatePlayerLine();
+        }
+    }
+    void DrawLine()
+    {
+        Vector2 mousePos = Input.mousePosition;
+
+        if (Vector2.Distance(mousePos, lastMousePosition) < drawDistance)
+        {
+            return;
+        }
+
+        Vector2 localPoint;
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(parentUI, mousePos, null, out localPoint);
+
+        GameObject line =
+            Instantiate(horizontalLinePrehub, parentUI);
+
+        RectTransform rect = line.GetComponent<RectTransform>();
+
+        rect.anchoredPosition = localPoint;
+
+        rect.sizeDelta = new Vector2(50f, rect.sizeDelta.y);
+
+        spawnedLines.Add(line);
+
+        lastMousePosition = mousePos;
+    }
     void CreateHorizontalLines()
     {
         for (int row = 0; row < rowCount; row++)
@@ -745,7 +903,7 @@ public class AmidaManager : MonoBehaviour
 
                     rect.sizeDelta = new Vector2(xSpacing, rect.sizeDelta.y);
 
-                    float startX = -((lineCount - 1) * xSpacing)/ 2f;
+                    float startX = -((lineCount - 1) * xSpacing) / 2f;
 
                     rect.anchoredPosition = new Vector2(startX + col * xSpacing + xSpacing / 2f, -row * ySpacing);
 
@@ -753,25 +911,6 @@ public class AmidaManager : MonoBehaviour
                 }
             }
         }
-    }
-
-    public int GetResult(int startIndex)
-    {
-        int current = startIndex;
-
-        for (int row = 0; row < rowCount; row++)
-        {
-            if (current > 0 && horizontalLines[row].Contains(current - 1))
-            {
-                current--;
-            }
-            else if (horizontalLines[row].Contains(current))
-            {
-                current++;
-            }
-        }
-
-        return current;
     }
     public void StartAmida(int startIndex)
     {
@@ -819,7 +958,7 @@ public class AmidaManager : MonoBehaviour
                 yield return MoveTo(rightPos);
             }
         }
-        resultText.text ="結果:" +rewards[current];
+        resultText.text = "結果:" + rewards[current];
         audioSource.PlayOneShot(goalSE);
         isMoving = false;
     }
@@ -835,102 +974,27 @@ public class AmidaManager : MonoBehaviour
         playerMarker.anchoredPosition = target;
 
     }
-    void AdjustSpacing()
+    public int GetResult(int startIndex)
     {
-        float width =parentUI.rect.width;
+        int current = startIndex;
 
-        float margin = 100f;
-
-        xSpacing =(width - margin)/ (lineCount - 1);
-
-        ySpacing = 80f;
-    }
-
-    void ArrangeButtons()
-    {
-        float startX = -((lineCount  - 1) * xSpacing) / 2f;
-        for (int i = 0;i < startButtons.Length;i++)
+        for (int row = 0; row < rowCount; row++)
         {
-            startButtons[i].anchoredPosition =new Vector2(startX + i * xSpacing, rowCount * ySpacing);
+            if (current > 0 && horizontalLines[row].Contains(current - 1))
+            {
+                current--;
+
+            }
+            else if (horizontalLines[row].Contains(current))
+            {
+                current++;
+            }
         }
+
+        return current;
     }
-    void UpdateScroll()
-    {
-        float targetY =
-            Mathf.Max(
-                0,
-                -playerMarker.anchoredPosition.y
-                - followOffset
-            );
-
-        Vector2 targetPos =
-            scrollTarget.anchoredPosition;
-
-        targetPos.y =
-            Mathf.Lerp(
-                scrollTarget.anchoredPosition.y,
-                targetY,
-                scrollSpeed
-                * Time.deltaTime
-            );
-
-        scrollTarget.anchoredPosition =
-            targetPos;
-    }
-    public void Retry()
-    {
-        Time.timeScale = 1f;
-
-        SceneManager.LoadScene(
-            SceneManager.GetActiveScene().name
-        );
-    }
-    void GameOver()
-    {
-        isGameOver = true;
-
-        resultText.text =
-            "GAME OVER\n" + "SCORE :" + score;
-
-        retryButton.SetActive(true);
-
-        Time.timeScale = 0f;
-    }
-    public void BackToTitle()
-    {
-        Time.timeScale = 1f;
-
-        SceneManager.LoadScene(
-            "TitleScene"
-        );
-    }
-    void UpdateScore()
-    {
-        float distance =
-            startY
-            - playerMarker
-            .anchoredPosition.y;
-
-        score =
-            Mathf.Max(
-                score,
-                Mathf.FloorToInt(
-                    distance / 10f
-                )
-            );
-
-        scoreText.text =
-            "SCORE : "
-            + score;
-    }
-    void UpdateDifficulty()
-    {
-        fallSpeed =
-            200f
-            + generatedRows * 0.5f;
-    }
-
 }
+
 
 
 
