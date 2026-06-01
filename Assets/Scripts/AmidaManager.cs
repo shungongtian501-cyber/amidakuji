@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class AmidaManager : MonoBehaviour
 {
+    private float startY;
     [SerializeField]
     private GameObject retryButton;
 
@@ -64,6 +65,11 @@ public class AmidaManager : MonoBehaviour
 
     [SerializeField]
     private Text resultText;
+
+    [SerializeField]
+    private Text scoreText;
+
+    private int score = 0;
 
     [SerializeField]
     private RectTransform playerMarker;
@@ -127,6 +133,8 @@ public class AmidaManager : MonoBehaviour
         GenerateRows(bufferRows);
 
         playerMarker.anchoredPosition = new Vector2(0, 300);
+        startY =
+    playerMarker.anchoredPosition.y;
     }
     void Update()
     {
@@ -146,6 +154,8 @@ public class AmidaManager : MonoBehaviour
         UpdateScroll();
 
         CheckGenerateRows();
+
+        UpdateScore();
     }
     void MoveDown()
     {
@@ -878,7 +888,7 @@ public class AmidaManager : MonoBehaviour
         isGameOver = true;
 
         resultText.text =
-            "GAME OVER";
+            "GAME OVER\n" + "SCORE :" + score;
 
         retryButton.SetActive(true);
 
@@ -892,6 +902,26 @@ public class AmidaManager : MonoBehaviour
             "TitleScene"
         );
     }
+    void UpdateScore()
+    {
+        float distance =
+            startY
+            - playerMarker
+            .anchoredPosition.y;
+
+        score =
+            Mathf.Max(
+                score,
+                Mathf.FloorToInt(
+                    distance / 10f
+                )
+            );
+
+        scoreText.text =
+            "SCORE : "
+            + score;
+    }
+
 }
 
 
