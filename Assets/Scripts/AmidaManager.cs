@@ -156,6 +156,8 @@ public class AmidaManager : MonoBehaviour
         CheckGenerateRows();
 
         UpdateScore();
+
+        UpdateDifficulty();
     }
     void MoveDown()
     {
@@ -920,6 +922,12 @@ public class AmidaManager : MonoBehaviour
         scoreText.text =
             "SCORE : "
             + score;
+    }
+    void UpdateDifficulty()
+    {
+        fallSpeed =
+            200f
+            + generatedRows * 0.5f;
     }
 
 }
