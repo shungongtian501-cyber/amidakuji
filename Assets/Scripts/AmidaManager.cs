@@ -214,14 +214,16 @@ public class AmidaManager : MonoBehaviour
     {
         isGameOver = true;
 
-        resultText.text =
-            "GAME OVER\n" + "SCORE :" + score;
+        PlayerPrefs.SetInt(
+            "Score",
+            score
+        );
 
-        retryButton.SetActive(true);
-
-        Time.timeScale = 0f;
+        SceneManager.LoadScene(
+            "ResultScene"
+        );
     }
-   //=====プレイヤー移動=====
+    //=====プレイヤー移動=====
     void MoveDown()
     {
         if (state != MoveState.Fall) return;
