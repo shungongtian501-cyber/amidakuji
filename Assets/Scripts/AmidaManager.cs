@@ -1,8 +1,9 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class AmidaManager : MonoBehaviour
 {
@@ -130,7 +131,9 @@ public class AmidaManager : MonoBehaviour
     //=====unity=====
     void Start()
     {
-        Random.InitState(System.DateTime.Now.Millisecond);
+        Random.InitState(
+            System.DateTime.Now.Millisecond
+        );
 
         AdjustSpacing();
 
@@ -140,9 +143,16 @@ public class AmidaManager : MonoBehaviour
 
         GenerateRows(bufferRows);
 
-        playerMarker.anchoredPosition = new Vector2(0, 300);
+        // ←追加
+        previewLine.gameObject
+            .SetActive(false);
+
+        playerMarker.anchoredPosition =
+            new Vector2(0, 300);
+
         startY =
-    playerMarker.anchoredPosition.y;
+            playerMarker
+            .anchoredPosition.y;
     }
     void Update()
     {
@@ -214,10 +224,16 @@ public class AmidaManager : MonoBehaviour
     {
         isGameOver = true;
 
-        PlayerPrefs.SetInt(
-            "Score",
-            score
+        Debug.Log(score);
+
+        ScoreManager.score = score;
+
+        Debug.Log(
+            "保存後:"
+            + ScoreManager.score
         );
+
+        Time.timeScale = 1f;
 
         SceneManager.LoadScene(
             "ResultScene"
@@ -419,6 +435,11 @@ public class AmidaManager : MonoBehaviour
     //=====線描画=====
     void HandleDrawInput()
     {
+        // UIを押してるなら線を描かない
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
         if (!isStarted)
         {
             return;
