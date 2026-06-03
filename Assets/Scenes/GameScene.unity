@@ -147,7 +147,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: e3279cd8c29b5154d9eda004add8025b, type: 3}
+  m_Resource: {fileID: 8300000, guid: af215890786e0384e842f2ac637a16af, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.122
   m_Pitch: 1
@@ -1700,20 +1700,15 @@ MonoBehaviour:
   drawDistance: 30
   previewLine: {fileID: 1292113878}
   startButtons:
-  - {fileID: 1850919890}
-  - {fileID: 1248768776}
-  - {fileID: 765382887}
-  - {fileID: 1215612468}
-  - {fileID: 1005663286}
-  rewards:
-  - "\u3042"
-  - "\u3044"
-  - "\u3046"
-  - "\u3048"
-  - "\u304A"
-  audioSource: {fileID: 1692923591}
-  moveSE: {fileID: 8300000, guid: 14f78a6a7b1d6c74db049a6c831184d0, type: 3}
-  goalSE: {fileID: 8300000, guid: cb236079a4316844fb7517fc4215f212, type: 3}
+  - {fileID: 1850919891}
+  - {fileID: 1248768777}
+  - {fileID: 765382888}
+  - {fileID: 1215612469}
+  - {fileID: 1005663287}
+  rewards: []
+  audioSource: {fileID: 0}
+  moveSE: {fileID: 0}
+  goalSE: {fileID: 0}
 --- !u!224 &1692923590
 RectTransform:
   m_ObjectHideFlags: 0

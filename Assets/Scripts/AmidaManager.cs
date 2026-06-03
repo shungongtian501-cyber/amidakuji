@@ -106,7 +106,7 @@ public class AmidaManager : MonoBehaviour
     private bool isDrawing = false;
 
     [SerializeField]
-    private RectTransform[] startButtons;
+    private Button[] startButtons;
 
     [SerializeField]
     private string[] rewards;
@@ -189,15 +189,24 @@ public class AmidaManager : MonoBehaviour
     //=====ゲーム開始、終了=====
     public void StartGame(int index)
     {
+        isStarted = true; // ←追加
         playerMarker.anchoredPosition =
             startButtons[index]
+            .GetComponent<RectTransform>()
             .anchoredPosition;
 
         startY =
             playerMarker
+            .GetComponent<RectTransform>()
             .anchoredPosition.y;
 
         isStarted = true;
+
+        // 全ボタン無効化
+        foreach (Button button in startButtons)
+        {
+            button.interactable = false;
+        }
 
         isDrawing = false;
         previewLine.gameObject.SetActive(false);
@@ -857,10 +866,21 @@ public class AmidaManager : MonoBehaviour
 
     void ArrangeButtons()
     {
-        float startX = -((lineCount  - 1) * xSpacing) / 2f;
-        for (int i = 0;i < startButtons.Length;i++)
+        float startX =
+            -((lineCount - 1)
+            * xSpacing) / 2f;
+
+        for (int i = 0;
+             i < startButtons.Length;
+             i++)
         {
-            startButtons[i].anchoredPosition =new Vector2(startX + i * xSpacing, rowCount * ySpacing);
+            startButtons[i]
+                .GetComponent<RectTransform>()
+                .anchoredPosition =
+                new Vector2(
+                    startX + i * xSpacing,
+                    rowCount * ySpacing
+                );
         }
     }
 
@@ -937,6 +957,8 @@ public class AmidaManager : MonoBehaviour
     }
     public void StartAmida(int startIndex)
     {
+      
+
         if (isMoving)
         {
             return;
@@ -954,7 +976,10 @@ public class AmidaManager : MonoBehaviour
         int current = startIndex;
 
         float startX = -((lineCount - 1) * xSpacing) / 2f;
-        playerMarker.anchoredPosition = startButtons[startIndex].anchoredPosition;
+        playerMarker.anchoredPosition =
+     startButtons[startIndex]
+     .GetComponent<RectTransform>()
+     .anchoredPosition;
 
         for (int row = 0; row < rowCount; row++)
         {

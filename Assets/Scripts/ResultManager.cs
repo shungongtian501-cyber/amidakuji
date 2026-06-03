@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -13,22 +14,31 @@ public class ResultManager : MonoBehaviour
     [SerializeField]
     private GameObject newRecordText;
 
+    [SerializeField]
+    private AudioSource audioSource;
+
+    [SerializeField]
+    private AudioClip resultBGM;
+
+    [SerializeField]
+    private AudioClip newRecordSE;
+
     void Start()
     {
         Debug.Log(
-        "受け取った:"
-        + ScoreManager.score
-    );
-        // 現在スコア取得
+            "受け取った:"
+            + ScoreManager.score
+        );
+
+        // 現在スコア
         int currentScore =
             ScoreManager.score;
 
-        // スコア表示
         scoreText.text =
             "SCORE : "
             + currentScore;
 
-        // 保存済みハイスコア取得
+        // 保存済みハイスコア
         int highScore =
             PlayerPrefs.GetInt(
                 "HighScore",
@@ -53,15 +63,50 @@ public class ResultManager : MonoBehaviour
             isNewRecord = true;
         }
 
-        // ハイスコア表示
+        // 表示更新
         highScoreText.text =
             "HIGH SCORE : "
             + highScore;
 
-        // NEW RECORD表示
         newRecordText.SetActive(
             isNewRecord
         );
+
+        // 音再生
+        if (isNewRecord)
+        {
+            StartCoroutine(
+                PlayNewRecordFlow()
+            );
+        }
+        else
+        {
+            audioSource.clip =
+                resultBGM;
+
+            audioSource.Play();
+        }
+    }
+
+    IEnumerator PlayNewRecordFlow()
+    {
+        // 壮大SE再生
+        audioSource.PlayOneShot(
+            newRecordSE
+        );
+
+        // SE終わるまで待つ
+        yield return new WaitForSeconds(
+            newRecordSE.length
+        );
+
+        // BGM再生
+        audioSource.clip =
+            resultBGM;
+
+        audioSource.loop = true;
+
+        audioSource.Play();
     }
 
     public void Retry()
