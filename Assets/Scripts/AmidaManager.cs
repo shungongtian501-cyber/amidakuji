@@ -153,6 +153,8 @@ public class AmidaManager : MonoBehaviour
         startY =
             playerMarker
             .anchoredPosition.y;
+
+        playerMarker.SetAsLastSibling();
     }
     void Update()
     {
