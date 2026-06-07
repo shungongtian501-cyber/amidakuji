@@ -8,6 +8,8 @@ using UnityEngine.EventSystems;
 public class AmidaManager : MonoBehaviour
 {
     [SerializeField]
+    private GameObject startText;
+    [SerializeField]
     private float obstacleHitRadius = 25f;
 
 
@@ -191,7 +193,22 @@ public class AmidaManager : MonoBehaviour
     //=====ゲーム開始、終了=====
     public void StartGame(int index)
     {
-        isStarted = true; // ←追加
+        StartCoroutine(
+            StartGameCoroutine(index)
+        );
+    }
+
+    IEnumerator StartGameCoroutine(
+    int index
+)
+    {
+        // 全ボタン無効化
+        foreach (Button button in startButtons)
+        {
+            button.interactable = false;
+        }
+
+        // プレイヤー位置
         playerMarker.anchoredPosition =
             startButtons[index]
             .GetComponent<RectTransform>()
@@ -199,21 +216,26 @@ public class AmidaManager : MonoBehaviour
 
         startY =
             playerMarker
-            .GetComponent<RectTransform>()
             .anchoredPosition.y;
 
-        isStarted = true;
+        // START表示
+        startText.SetActive(true);
 
-        // 全ボタン無効化
-        foreach (Button button in startButtons)
-        {
-            button.interactable = false;
-        }
+        // 1秒待つ
+        yield return new WaitForSeconds(1f);
+
+        // START非表示
+        startText.SetActive(false);
+
+        // ゲーム開始
+        isStarted = true;
 
         isDrawing = false;
         previewLine.gameObject.SetActive(false);
 
-        Debug.Log("開始 " + index);
+        Debug.Log(
+            "開始 " + index
+        );
     }
     public void Retry()
     {
