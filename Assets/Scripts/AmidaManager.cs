@@ -8,6 +8,11 @@ using UnityEngine.EventSystems;
 public class AmidaManager : MonoBehaviour
 {
     [SerializeField]
+    private Text gameOverText;
+
+    [SerializeField]
+    private AudioClip gameOverSE;
+    [SerializeField]
     private CanvasGroup startCanvasGroup;
     [SerializeField]
     private AudioSource startAudioSource;
@@ -124,6 +129,9 @@ public class AmidaManager : MonoBehaviour
     private AudioSource audioSource;
 
     [SerializeField]
+    private AudioSource bgmSource;
+
+    [SerializeField]
     private AudioClip moveSE;
 
     [SerializeField]
@@ -140,6 +148,7 @@ public class AmidaManager : MonoBehaviour
     //=====unity=====
     void Start()
     {
+        gameOverText.gameObject.SetActive(false);
         Random.InitState(
             System.DateTime.Now.Millisecond
         );
@@ -222,20 +231,23 @@ public class AmidaManager : MonoBehaviour
             .anchoredPosition;
 
         startY =
-            playerMarker
-            .anchoredPosition.y;
+            playerMarker.anchoredPosition.y;
 
         // START表示
         startText.SetActive(true);
 
-        // 透明度リセット
         startCanvasGroup.alpha = 1f;
 
-        // SE再生
+        // スタートSE
         startAudioSource.PlayOneShot(startSE);
 
-        // 少し待つ
-        yield return new WaitForSeconds(0.7f);
+        // 演出待ち
+        yield return new WaitForSeconds(
+            startSE.length
+        );
+
+        // BGM開始
+        bgmSource.Play();
 
         // フェードアウト
         float fadeTime = 0.5f;
@@ -255,18 +267,12 @@ public class AmidaManager : MonoBehaviour
             yield return null;
         }
 
-        // 非表示
         startText.SetActive(false);
 
-        // ゲーム開始
+        // ←ここ超重要
         isStarted = true;
 
-        isDrawing = false;
-        previewLine.gameObject.SetActive(false);
-
-        Debug.Log(
-            "開始 " + index
-        );
+        Debug.Log("ゲーム開始");
     }
     public void Retry()
     {
@@ -284,25 +290,44 @@ public class AmidaManager : MonoBehaviour
             "TitleScene"
         );
     }
-    void GameOver()
+    IEnumerator GameOverCoroutine()
     {
-        isGameOver = true;
+        // プレイヤー停止
+        isStarted = false;
 
-        Debug.Log(score);
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
 
+        // GameOver表示
+        gameOverText.gameObject.SetActive(true);
+        gameOverText.text = "GAME OVER";
+
+        // ピピー！SE
+        audioSource.PlayOneShot(gameOverSE);
+
+        // スコア保存
         ScoreManager.score = score;
 
-        Debug.Log(
-            "保存後:"
-            + ScoreManager.score
-        );
+        // 2秒待つ
+        yield return new WaitForSeconds(2f);
 
-        Time.timeScale = 1f;
-
-        SceneManager.LoadScene(
-            "ResultScene"
-        );
+        // Resultへ
+        SceneManager.LoadScene("ResultScene");
     }
+    void GameOver()
+    {
+        if (isGameOver)
+        {
+            return;
+        }
+
+        isGameOver = true;
+
+        StartCoroutine(GameOverCoroutine());
+    }
+
     //=====プレイヤー移動=====
     void MoveDown()
     {
