@@ -8,6 +8,13 @@ using UnityEngine.EventSystems;
 public class AmidaManager : MonoBehaviour
 {
     [SerializeField]
+    private CanvasGroup startCanvasGroup;
+    [SerializeField]
+    private AudioSource startAudioSource;
+
+    [SerializeField]
+    private AudioClip startSE;
+    [SerializeField]
     private GameObject startText;
     [SerializeField]
     private float obstacleHitRadius = 25f;
@@ -202,7 +209,7 @@ public class AmidaManager : MonoBehaviour
     int index
 )
     {
-        // 全ボタン無効化
+        // ボタン無効化
         foreach (Button button in startButtons)
         {
             button.interactable = false;
@@ -221,10 +228,34 @@ public class AmidaManager : MonoBehaviour
         // START表示
         startText.SetActive(true);
 
-        // 1秒待つ
-        yield return new WaitForSeconds(1f);
+        // 透明度リセット
+        startCanvasGroup.alpha = 1f;
 
-        // START非表示
+        // SE再生
+        startAudioSource.PlayOneShot(startSE);
+
+        // 少し待つ
+        yield return new WaitForSeconds(0.7f);
+
+        // フェードアウト
+        float fadeTime = 0.5f;
+        float timer = 0f;
+
+        while (timer < fadeTime)
+        {
+            timer += Time.deltaTime;
+
+            startCanvasGroup.alpha =
+                Mathf.Lerp(
+                    1f,
+                    0f,
+                    timer / fadeTime
+                );
+
+            yield return null;
+        }
+
+        // 非表示
         startText.SetActive(false);
 
         // ゲーム開始
