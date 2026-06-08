@@ -632,34 +632,39 @@ public class AmidaManager : MonoBehaviour
         lineIndex = Mathf.Clamp(
             lineIndex,
             0,
-            lineCount - 2
+            lineCount - 1
         );
 
         // 開始位置を縦線に固定
-        float snappedStartX =
-            startX
-            + lineIndex * xSpacing;
-
         startPos.x =
-            snappedStartX;
-
-        // 左右の行き先
-        float leftX =
             startX
             + lineIndex * xSpacing;
 
-        float rightX =
-            startX
-            + (lineIndex + 1)
-            * xSpacing;
-
+        // 右方向か判定
         bool drawRight =
             endPos.x > startPos.x;
 
+        // 左右端チェック
+        if (!drawRight && lineIndex <= 0)
+        {
+            return;
+        }
+
+        if (drawRight
+            && lineIndex >= lineCount - 1)
+        {
+            return;
+        }
+
+        // 行き先X
         float finalX =
             drawRight
-            ? rightX
-            : leftX;
+            ? startX
+                + (lineIndex + 1)
+                * xSpacing
+            : startX
+                + (lineIndex - 1)
+                * xSpacing;
 
         // 線の中心
         Vector2 center =
@@ -682,7 +687,7 @@ public class AmidaManager : MonoBehaviour
         rect.anchoredPosition =
             center;
 
-        // 長さ固定
+        // 長さ
         rect.sizeDelta =
             new Vector2(
                 Mathf.Abs(
@@ -695,7 +700,7 @@ public class AmidaManager : MonoBehaviour
         spawnedLines.Add(line);
     }
     //=====障害物=====
-    
+
     void CreateObstacle(
     RectTransform lineRect)
     {
@@ -927,11 +932,22 @@ public class AmidaManager : MonoBehaviour
     }
     void UpdateDifficulty()
     {
+        // スピード上昇
         fallSpeed =
-            200f
-            + generatedRows * 0.5f;
+     Mathf.Lerp(
+         200f,
+         450f,
+         generatedRows / 300f
+     );
+        // 障害物率上昇
+        obstacleChance =
+            Mathf.Clamp(
+                0.1f + generatedRows * 0.001f,
+                0.1f,
+                0.3f
+            );
     }
-   
+
     //=====レイアウト補助=====
     void AdjustSpacing()
     {
