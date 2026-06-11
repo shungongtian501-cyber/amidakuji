@@ -7,6 +7,15 @@ using UnityEngine.EventSystems;
 
 public class AmidaManager : MonoBehaviour
 {
+
+    [SerializeField]
+    private Image skillGauge;
+    private float currentInvincibleTime = 0f;
+    [SerializeField]
+    private AudioSource invincibleBgmSource;
+    private Image playerImage;
+    [SerializeField]
+    private Image skillIcon;
     [SerializeField]
     private Text gameOverText;
 
@@ -92,6 +101,13 @@ public class AmidaManager : MonoBehaviour
 
     [SerializeField]
     private RectTransform playerMarker;
+    [SerializeField]
+    private float invincibleTime = 3f;
+
+
+    private bool isInvincible = false;
+
+    private bool canUseInvincible = true;
 
     [SerializeField]
     private float moveSpeed = 300f;
@@ -173,6 +189,9 @@ public class AmidaManager : MonoBehaviour
             .anchoredPosition.y;
 
         playerMarker.SetAsLastSibling();
+
+        playerImage =
+    playerMarker.GetComponent<Image>();
     }
     void Update()
     {
@@ -190,6 +209,8 @@ public class AmidaManager : MonoBehaviour
         // ↓開始後だけ
         HandleDrawInput();
 
+        HandleInvincibleInput();
+
         CheckObstacleCollision();
 
         if (state == MoveState.Fall)
@@ -205,6 +226,8 @@ public class AmidaManager : MonoBehaviour
         CheckGenerateRows();
         UpdateScore();
         UpdateDifficulty();
+        UpdateRainbow();
+        UpdateSkillGauge();
     }
     //=====ゲーム開始、終了=====
     public void StartGame(int index)
@@ -521,6 +544,105 @@ public class AmidaManager : MonoBehaviour
 
         spawnedLines.Add(line);
     }
+    void HandleInvincibleInput()
+    {
+        if (Input.GetKeyDown(KeyCode.E)
+            && canUseInvincible)
+        {
+            StartCoroutine(
+                InvincibleCoroutine()
+            );
+        }
+    }
+    IEnumerator InvincibleCoroutine()
+    {
+
+        canUseInvincible = false;
+        isInvincible = true;
+
+        currentInvincibleTime =
+    invincibleTime;
+
+        // 通常BGM停止
+        bgmSource.Stop();
+
+        // 無敵BGM開始
+        invincibleBgmSource.Play();
+
+
+        Debug.Log("無敵開始");
+
+        // プレイヤー半透明
+        Image playerImage =
+            playerMarker.GetComponent<Image>();
+
+        if (playerImage != null)
+        {
+            Color c = playerImage.color;
+            c.a = 0.5f;
+            playerImage.color = c;
+        }
+
+        // スキルUI半透明（使用済み感）
+        if (skillIcon != null)
+        {
+            Color c = skillIcon.color;
+            c.a = 0.3f;
+            skillIcon.color = c;
+        }
+
+        yield return new WaitForSeconds(
+            invincibleTime
+        );
+
+        isInvincible = false;
+
+        // 無敵BGM停止
+        invincibleBgmSource.Stop();
+
+        // 通常BGM再開
+        bgmSource.Play();
+
+        // プレイヤー元に戻す
+        if (playerImage != null)
+        {
+            Color c = playerImage.color;
+            c.a = 1f;
+            playerImage.color = c;
+        }
+
+        Debug.Log("無敵終了");
+    }
+    void UpdateSkillGauge()
+    {
+        if (skillGauge == null)
+        {
+            return;
+        }
+
+        // 無敵中
+        if (isInvincible)
+        {
+            currentInvincibleTime -=
+                Time.deltaTime;
+
+            skillGauge.fillAmount =
+                currentInvincibleTime
+                / invincibleTime;
+        }
+        else
+        {
+            // 使用済みなら空
+            if (!canUseInvincible)
+            {
+                skillGauge.fillAmount = 0f;
+            }
+            else
+            {
+                skillGauge.fillAmount = 1f;
+            }
+        }
+    }
     //=====線描画=====
     void HandleDrawInput()
     {
@@ -751,6 +873,11 @@ public class AmidaManager : MonoBehaviour
 
             if (distance < obstacleHitRadius)
             {
+                if (isInvincible)
+                {
+                    return;
+                }
+
                 GameOver();
                 return;
             }
@@ -977,6 +1104,38 @@ public class AmidaManager : MonoBehaviour
                     startX + i * xSpacing,
                     rowCount * ySpacing
                 );
+        }
+    }
+    void UpdateRainbow()
+    {
+        if (playerImage == null)
+        {
+            return;
+        }
+
+        // 無敵中だけ虹色
+        if (isInvincible)
+        {
+            Color rainbowColor =
+                Color.HSVToRGB(
+                    Mathf.Repeat(
+                        Time.time * 2f,
+                        1f
+                    ),
+                    1f,
+                    1f
+                );
+
+            rainbowColor.a = 1f;
+
+            playerImage.color =
+                rainbowColor;
+        }
+        else
+        {
+            // 通常色に戻す
+            playerImage.color =
+                Color.white;
         }
     }
 
