@@ -183,7 +183,7 @@ public class AmidaManager : MonoBehaviour
             .SetActive(false);
 
         playerMarker.anchoredPosition =
-            new Vector2(0, 300);
+            new Vector2(0, -rowCount * ySpacing);
 
         startY =
             playerMarker
@@ -216,7 +216,7 @@ public class AmidaManager : MonoBehaviour
 
         if (state == MoveState.Fall)
         {
-            MoveDown();
+            MoveUp();
         }
         else if (state == MoveState.HorizontalMove)
         {
@@ -353,12 +353,12 @@ public class AmidaManager : MonoBehaviour
     }
 
     //=====プレイヤー移動=====
-    void MoveDown()
+    void MoveUp()
     {
         if (state != MoveState.Fall) return;
 
         playerMarker.anchoredPosition +=
-            Vector2.down * fallSpeed * Time.deltaTime;
+            Vector2.up * fallSpeed * Time.deltaTime;
 
         CheckLineCollision();
     }
@@ -517,7 +517,7 @@ public class AmidaManager : MonoBehaviour
 
             // 少し下げる
             playerMarker.anchoredPosition +=
-                Vector2.down * 15f;
+                Vector2.up * 15f;
 
             state = MoveState.Fall;
 
@@ -917,12 +917,11 @@ public class AmidaManager : MonoBehaviour
     void CheckGenerateRows()
     {
         int playerRow =
-            Mathf.FloorToInt(
-                Mathf.Abs(
-                    playerMarker
-                    .anchoredPosition.y
-                ) / ySpacing
-            );
+    Mathf.FloorToInt(
+        playerMarker
+        .anchoredPosition.y
+        / ySpacing
+    );
 
         if (generatedRows
             < playerRow
@@ -989,7 +988,7 @@ public class AmidaManager : MonoBehaviour
                             startX
                             + col * xSpacing
                             + xSpacing / 2f,
-                            -row * ySpacing
+                            row * ySpacing
                         );
 
                     CreateObstacle(rect);
@@ -1026,7 +1025,7 @@ public class AmidaManager : MonoBehaviour
             rect.anchoredPosition =
                 new Vector2(
                     startX + i * xSpacing,
-                    -7200f
+                    7200f
                 );
 
             rect.sizeDelta =
@@ -1048,8 +1047,8 @@ public class AmidaManager : MonoBehaviour
         float targetY =
             Mathf.Max(
                 0,
-                -playerMarker.anchoredPosition.y
-                - followOffset
+                playerMarker.anchoredPosition.y
+                + followOffset
             );
 
         Vector2 targetPos =
@@ -1058,7 +1057,7 @@ public class AmidaManager : MonoBehaviour
         targetPos.y =
             Mathf.Lerp(
                 scrollTarget.anchoredPosition.y,
-                targetY,
+                -targetY,
                 scrollSpeed
                 * Time.deltaTime
             );
@@ -1071,9 +1070,8 @@ public class AmidaManager : MonoBehaviour
     void UpdateScore()
     {
         float distance =
-            startY
-            - playerMarker
-            .anchoredPosition.y;
+     playerMarker.anchoredPosition.y
+     - startY;
 
         score =
             Mathf.Max(
@@ -1132,7 +1130,7 @@ public class AmidaManager : MonoBehaviour
                 .anchoredPosition =
                 new Vector2(
                     startX + i * xSpacing,
-                    rowCount * ySpacing
+                    -rowCount * ySpacing
                 );
         }
     }
