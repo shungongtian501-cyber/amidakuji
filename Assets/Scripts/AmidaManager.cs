@@ -7,7 +7,8 @@ using UnityEngine.EventSystems;
 
 public class AmidaManager : MonoBehaviour
 {
-
+    [SerializeField]
+    private Canvas canvas;
     [SerializeField]
     private Image skillGauge;
     private float currentInvincibleTime = 0f;
@@ -614,35 +615,35 @@ public class AmidaManager : MonoBehaviour
         Debug.Log("無敵終了");
     }
     void UpdateSkillGauge()
+{
+    if (skillGauge == null)
     {
-        if (skillGauge == null)
-        {
-            return;
-        }
+        return;
+    }
 
-        // 無敵中
-        if (isInvincible)
-        {
-            currentInvincibleTime -=
-                Time.deltaTime;
+    // 無敵中
+    if (isInvincible)
+    {
+        currentInvincibleTime -=
+            Time.deltaTime;
 
-            skillGauge.fillAmount =
-                currentInvincibleTime
-                / invincibleTime;
+        skillGauge.fillAmount =
+            currentInvincibleTime
+            / invincibleTime;
+    }
+    else
+    {
+        // 使用済みなら空
+        if (!canUseInvincible)
+        {
+            skillGauge.fillAmount = 0f;
         }
         else
         {
-            // 使用済みなら空
-            if (!canUseInvincible)
-            {
-                skillGauge.fillAmount = 0f;
-            }
-            else
-            {
-                skillGauge.fillAmount = 1f;
-            }
+            skillGauge.fillAmount = 1f;
         }
     }
+}
     //=====線描画=====
     void HandleDrawInput()
     {
@@ -657,13 +658,27 @@ public class AmidaManager : MonoBehaviour
         }
         if (Input.GetMouseButtonDown(0))
         {
+            Vector2 localMouse;
+
+            Camera cam =
+    canvas.renderMode
+    == RenderMode.ScreenSpaceOverlay
+    ? null
+    : canvas.worldCamera;
+
+
             RectTransformUtility
-                .ScreenPointToLocalPointInRectangle(
-                    parentUI,
-                    Input.mousePosition,
-                    null,
-                    out startDrawPosition
-                );
+.ScreenPointToLocalPointInRectangle(
+    canvas.transform as RectTransform,
+    Input.mousePosition,
+    cam,
+    out localMouse
+);
+
+            // Scroll分を補正
+            localMouse -= scrollTarget.anchoredPosition;
+
+            startDrawPosition = localMouse;
 
             isDrawing = true;
 
@@ -692,17 +707,24 @@ public class AmidaManager : MonoBehaviour
     {
         Vector2 currentPos;
 
+        Camera cam =
+    canvas.renderMode
+    == RenderMode.ScreenSpaceOverlay
+    ? null
+    : canvas.worldCamera;
+
         RectTransformUtility
-            .ScreenPointToLocalPointInRectangle(
-                parentUI,
-                Input.mousePosition,
-                null,
-                out currentPos
-            );
+.ScreenPointToLocalPointInRectangle(
+    canvas.transform as RectTransform,
+    Input.mousePosition,
+    cam,
+    out currentPos
+);
+
+        currentPos -= scrollTarget.anchoredPosition;
 
         Vector2 center =
-            (startDrawPosition
-            + currentPos) / 2f;
+            (startDrawPosition + currentPos) / 2f;
 
         previewLine.anchoredPosition =
             center;
@@ -725,13 +747,21 @@ public class AmidaManager : MonoBehaviour
     {
         Vector2 endPos;
 
+        Camera cam =
+    canvas.renderMode
+    == RenderMode.ScreenSpaceOverlay
+    ? null
+    : canvas.worldCamera;
+
         RectTransformUtility
-            .ScreenPointToLocalPointInRectangle(
-                parentUI,
-                endMousePos,
-                null,
-                out endPos
-            );
+ .ScreenPointToLocalPointInRectangle(
+     canvas.transform as RectTransform,
+     endMousePos,
+     cam,
+     out endPos
+ );
+
+        endPos -= scrollTarget.anchoredPosition;
 
         // 少ししか動かしてないなら作らない
         if (Vector2.Distance(startPos, endPos) < 30f)
