@@ -2071,7 +2071,7 @@ MonoBehaviour:
   scrollSpeed: 7
   followOffset: 100
   obstaclePrefab: {fileID: 5112824947069215408, guid: cdf20936c26e2e2448089f802f6195d6, type: 3}
-  obstacleChance: 0.5
+  obstacleChance: 0.3
   verticalLinePrehub: {fileID: 3364958325403992613, guid: 683c846948a03524abbd7378ff9ce193, type: 3}
   horizontalLinePrehub: {fileID: 7087808043464680376, guid: a277acdd3a0d886439836e8079e8ddd1, type: 3}
   parentUI: {fileID: 1843565487}
@@ -2084,7 +2084,7 @@ MonoBehaviour:
   playerMarker: {fileID: 1731758010}
   invincibleTime: 3
   moveSpeed: 300
-  fallSpeed: 59.7
+  fallSpeed: 200
   lineCreateInterval: 0.2
   drawDistance: 30
   previewLine: {fileID: 1292113878}
@@ -2583,12 +2583,12 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 1
+  m_FillAmount: 0.5
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0

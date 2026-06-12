@@ -1170,162 +1170,162 @@ public class AmidaManager : MonoBehaviour
     }
 
     // ===== 旧システム（保留）=====
-    void CreateLineInput()
-    {
-        lineTimer += Time.deltaTime;
+//    void CreateLineInput()
+//    {
+//        lineTimer += Time.deltaTime;
 
-        if (Input.GetMouseButton(0) && lineTimer >= lineCreateInterval)
-        {
-            lineTimer = 0f;
+//        if (Input.GetMouseButton(0) && lineTimer >= lineCreateInterval)
+//        {
+//            lineTimer = 0f;
 
-            CreatePlayerLine();
-        }
-    }
-    void DrawLine()
-    {
-        Vector2 mousePos = Input.mousePosition;
+//            CreatePlayerLine();
+//        }
+//    }
+//    void DrawLine()
+//    {
+//        Vector2 mousePos = Input.mousePosition;
 
-        if (Vector2.Distance(mousePos, lastMousePosition) < drawDistance)
-        {
-            return;
-        }
+//        if (Vector2.Distance(mousePos, lastMousePosition) < drawDistance)
+//        {
+//            return;
+//        }
 
-        Vector2 localPoint;
+//        Vector2 localPoint;
 
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(parentUI, mousePos, null, out localPoint);
+//        RectTransformUtility.ScreenPointToLocalPointInRectangle(parentUI, mousePos, null, out localPoint);
 
-        GameObject line =
-            Instantiate(horizontalLinePrehub, parentUI);
+//        GameObject line =
+//            Instantiate(horizontalLinePrehub, parentUI);
 
-        RectTransform rect = line.GetComponent<RectTransform>();
+//        RectTransform rect = line.GetComponent<RectTransform>();
 
-        rect.anchoredPosition = localPoint;
+//        rect.anchoredPosition = localPoint;
 
-        rect.sizeDelta = new Vector2(50f, rect.sizeDelta.y);
+//        rect.sizeDelta = new Vector2(50f, rect.sizeDelta.y);
 
-        spawnedLines.Add(line);
+//        spawnedLines.Add(line);
 
-        lastMousePosition = mousePos;
-    }
-    void CreateHorizontalLines()
-    {
-        for (int row = 0; row < rowCount; row++)
-        {
-            horizontalLines[row] = new List<int>();
+//        lastMousePosition = mousePos;
+//    }
+//    void CreateHorizontalLines()
+//    {
+//        for (int row = 0; row < rowCount; row++)
+//        {
+//            horizontalLines[row] = new List<int>();
 
-            for (int col = 0; col < lineCount - 1; col++)
-            {
-                if (Random.value < 0.6f)
-                {
-                    if (horizontalLines[row].Count > 0 && horizontalLines[row][horizontalLines[row].Count - 1] == col - 1)
-                    {
-                        continue;
-                    }
-                    horizontalLines[row].Add(col);
+//            for (int col = 0; col < lineCount - 1; col++)
+//            {
+//                if (Random.value < 0.6f)
+//                {
+//                    if (horizontalLines[row].Count > 0 && horizontalLines[row][horizontalLines[row].Count - 1] == col - 1)
+//                    {
+//                        continue;
+//                    }
+//                    horizontalLines[row].Add(col);
 
-                    GameObject line = Instantiate(horizontalLinePrehub, parentUI);
+//                    GameObject line = Instantiate(horizontalLinePrehub, parentUI);
 
-                    spawnedLines.Add(line);
+//                    spawnedLines.Add(line);
 
-                    RectTransform rect = line.GetComponent<RectTransform>();
+//                    RectTransform rect = line.GetComponent<RectTransform>();
 
-                    rect.sizeDelta = new Vector2(xSpacing, rect.sizeDelta.y);
+//                    rect.sizeDelta = new Vector2(xSpacing, rect.sizeDelta.y);
 
-                    float startX = -((lineCount - 1) * xSpacing) / 2f;
+//                    float startX = -((lineCount - 1) * xSpacing) / 2f;
 
-                    rect.anchoredPosition = new Vector2(startX + col * xSpacing + xSpacing / 2f, -row * ySpacing);
+//                    rect.anchoredPosition = new Vector2(startX + col * xSpacing + xSpacing / 2f, -row * ySpacing);
 
-                    CreateObstacle(rect);
-                }
-            }
-        }
-    }
-    public void StartAmida(int startIndex)
-    {
+//                    CreateObstacle(rect);
+//                }
+//            }
+//        }
+//    }
+//    public void StartAmida(int startIndex)
+//    {
       
 
-        if (isMoving)
-        {
-            return;
-        }
+//        if (isMoving)
+//        {
+//            return;
+//        }
 
-        isMoving = true;
+//        isMoving = true;
 
-        Debug.Log("押された");
-        StopAllCoroutines();
+//        Debug.Log("押された");
+//        StopAllCoroutines();
 
-        StartCoroutine(MoveAmida(startIndex));
-    }
-    IEnumerator MoveAmida(int startIndex)
-    {
-        int current = startIndex;
+//        StartCoroutine(MoveAmida(startIndex));
+//    }
+//    IEnumerator MoveAmida(int startIndex)
+//    {
+//        int current = startIndex;
 
-        float startX = -((lineCount - 1) * xSpacing) / 2f;
-        playerMarker.anchoredPosition =
-     startButtons[startIndex]
-     .GetComponent<RectTransform>()
-     .anchoredPosition;
+//        float startX = -((lineCount - 1) * xSpacing) / 2f;
+//        playerMarker.anchoredPosition =
+//     startButtons[startIndex]
+//     .GetComponent<RectTransform>()
+//     .anchoredPosition;
 
-        for (int row = 0; row < rowCount; row++)
-        {
-            Vector2 downPos = new Vector2(startX + current * xSpacing, -row * ySpacing);
+//        for (int row = 0; row < rowCount; row++)
+//        {
+//            Vector2 downPos = new Vector2(startX + current * xSpacing, -row * ySpacing);
 
-            yield return MoveTo(downPos);
+//            yield return MoveTo(downPos);
 
-            if (current > 0 && horizontalLines[row].Contains(current - 1))
-            {
-                audioSource.PlayOneShot(moveSE);
+//            if (current > 0 && horizontalLines[row].Contains(current - 1))
+//            {
+//                audioSource.PlayOneShot(moveSE);
 
-                current--;
-                Vector2 leftPos = new Vector2(startX + current * xSpacing, -row * ySpacing);
+//                current--;
+//                Vector2 leftPos = new Vector2(startX + current * xSpacing, -row * ySpacing);
 
-                yield return MoveTo(leftPos);
-            }
-            else if (horizontalLines[row].Contains(current))
-            {
-                audioSource.PlayOneShot(moveSE);
+//                yield return MoveTo(leftPos);
+//            }
+//            else if (horizontalLines[row].Contains(current))
+//            {
+//                audioSource.PlayOneShot(moveSE);
 
-                current++;
-                Vector2 rightPos = new Vector2(startX + current * xSpacing, -row * ySpacing);
+//                current++;
+//                Vector2 rightPos = new Vector2(startX + current * xSpacing, -row * ySpacing);
 
-                yield return MoveTo(rightPos);
-            }
-        }
-        resultText.text = "結果:" + rewards[current];
-        audioSource.PlayOneShot(goalSE);
-        isMoving = false;
-    }
-    IEnumerator MoveTo(Vector2 target)
-    {
-        while (Vector2.Distance(playerMarker.anchoredPosition, target) > 1f)
-        {
-            playerMarker.anchoredPosition = Vector2.MoveTowards(playerMarker.anchoredPosition, target, moveSpeed * Time.deltaTime);
+//                yield return MoveTo(rightPos);
+//            }
+//        }
+//        resultText.text = "結果:" + rewards[current];
+//        audioSource.PlayOneShot(goalSE);
+//        isMoving = false;
+//    }
+//    IEnumerator MoveTo(Vector2 target)
+//    {
+//        while (Vector2.Distance(playerMarker.anchoredPosition, target) > 1f)
+//        {
+//            playerMarker.anchoredPosition = Vector2.MoveTowards(playerMarker.anchoredPosition, target, moveSpeed * Time.deltaTime);
 
-            yield return null;
-        }
+//            yield return null;
+//        }
 
-        playerMarker.anchoredPosition = target;
+//        playerMarker.anchoredPosition = target;
 
-    }
-    public int GetResult(int startIndex)
-    {
-        int current = startIndex;
+//    }
+//    public int GetResult(int startIndex)
+//    {
+//        int current = startIndex;
 
-        for (int row = 0; row < rowCount; row++)
-        {
-            if (current > 0 && horizontalLines[row].Contains(current - 1))
-            {
-                current--;
+//        for (int row = 0; row < rowCount; row++)
+//        {
+//            if (current > 0 && horizontalLines[row].Contains(current - 1))
+//            {
+//                current--;
 
-            }
-            else if (horizontalLines[row].Contains(current))
-            {
-                current++;
-            }
-        }
+//            }
+//            else if (horizontalLines[row].Contains(current))
+//            {
+//                current++;
+//            }
+//        }
 
-        return current;
-    }
+//        return current;
+//    }
 }
 
 
