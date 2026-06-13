@@ -1086,7 +1086,7 @@ public class AmidaManager : MonoBehaviour
             );
 
         scoreText.text =
-           score * 10 + "m";
+         "現在 :" + score * 10 + "m";
     }
     void UpdateDifficulty()
     {
