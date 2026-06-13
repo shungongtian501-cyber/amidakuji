@@ -816,7 +816,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -369.1, y: 111.52}
+  m_AnchoredPosition: {x: -477.38, y: 111.52}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &761920677
@@ -2144,7 +2144,7 @@ MonoBehaviour:
   startAudioSource: {fileID: 466376744}
   startSE: {fileID: 8300000, guid: 45945b059ac734042ba4521831b91c47, type: 3}
   startText: {fileID: 504082707}
-  obstacleHitRadius: 25
+  obstacleHitRadius: 10
   retryButton: {fileID: 0}
   bufferRows: 10
   scrollTarget: {fileID: 1843565487}
@@ -2166,6 +2166,7 @@ MonoBehaviour:
   invincibleTime: 3
   moveSpeed: 300
   fallSpeed: 200
+  difficultyTime: 60
   lineCreateInterval: 0.2
   drawDistance: 30
   previewLine: {fileID: 1292113878}

@@ -103,6 +103,8 @@ public class AmidaManager : MonoBehaviour
 
     private int score = 0;
 
+    private float gameTime = 0f;
+
     [SerializeField]
     private RectTransform playerMarker;
     [SerializeField]
@@ -118,6 +120,9 @@ public class AmidaManager : MonoBehaviour
 
     [SerializeField]
     private float fallSpeed = 200f;
+
+    [SerializeField]
+    private float difficultyTime = 60f;
 
     [SerializeField]
     private float lineCreateInterval = 0.2f;
@@ -209,6 +214,7 @@ public class AmidaManager : MonoBehaviour
         {
             return;
         }
+        gameTime += Time.deltaTime;
 
         // ↓開始後だけ
         HandleDrawInput();
@@ -1090,19 +1096,24 @@ public class AmidaManager : MonoBehaviour
     }
     void UpdateDifficulty()
     {
-        // スピード上昇
+        float difficulty =
+            Mathf.Clamp01(
+                gameTime
+                / difficultyTime
+            );
+
         fallSpeed =
-     Mathf.Lerp(
-         200f,
-         450f,
-         generatedRows / 300f
-     );
-        // 障害物率上昇
+            Mathf.Lerp(
+                200f,
+                500f,
+                difficulty
+            );
+
         obstacleChance =
-            Mathf.Clamp(
-                0.1f + generatedRows * 0.001f,
+            Mathf.Lerp(
                 0.1f,
-                0.3f
+                0.4f,
+                difficulty
             );
     }
 
