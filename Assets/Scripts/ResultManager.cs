@@ -6,6 +6,9 @@ using UnityEngine.SceneManagement;
 public class ResultManager : MonoBehaviour
 {
     [SerializeField]
+    private Text mountainRankText;
+
+    [SerializeField]
     private Text scoreText;
 
     [SerializeField]
@@ -25,10 +28,6 @@ public class ResultManager : MonoBehaviour
 
     void Start()
     {
-        Debug.Log(
-            "受け取った:"
-            + ScoreManager.score
-        );
 
         // 現在スコア
         int currentScore =
@@ -36,14 +35,23 @@ public class ResultManager : MonoBehaviour
 
         scoreText.text =
             "SCORE : "
-            + currentScore;
+            + (currentScore * 10) + "m";
 
-        // 保存済みハイスコア
+        int mountainHeight =
+    currentScore * 10;
+
+        mountainRankText.text =
+    mountainHeight
+    + "m\n"
+    + "🏔 "
+    + GetMountainRank(
+        mountainHeight
+    );
         int highScore =
-            PlayerPrefs.GetInt(
-                "HighScore",
-                0
-            );
+    PlayerPrefs.GetInt(
+        "HighScore",
+        0
+    );
 
         bool isNewRecord = false;
 
@@ -66,7 +74,8 @@ public class ResultManager : MonoBehaviour
         // 表示更新
         highScoreText.text =
             "HIGH SCORE : "
-            + highScore;
+            + (highScore * 10 )
+            + "m";
 
         newRecordText.SetActive(
             isNewRecord
@@ -121,5 +130,60 @@ public class ResultManager : MonoBehaviour
         SceneManager.LoadScene(
             "TitleScene"
         );
+    }
+    string GetMountainRank(int height)
+    {
+        if (height < 500)
+        {
+            return "散歩レベル";
+        }
+        else if (height < 1000)
+        {
+            return "高尾山級";
+        }
+        else if (height < 2000)
+        {
+            return "阿蘇山級";
+        }
+        else if (height < 3000)
+        {
+            return "北岳級";
+        }
+        else if (height < 3776)
+        {
+            return "富士山目前！";
+        }
+        else if (height < 5000)
+        {
+            return "富士山級";
+        }
+        else if (height < 6000)
+        {
+            return "キリマンジャロ級";
+        }
+        else if (height < 7000)
+        {
+            return "デナリ級";
+        }
+        else if (height < 8000)
+        {
+            return "アコンカグア級";
+        }
+        else if (height < 8849)
+        {
+            return "エベレスト目前！";
+        }
+        else if (height < 10000)
+        {
+            return "エベレスト級";
+        }
+        else if (height < 12000)
+        {
+            return "成層圏級";
+        }
+        else
+        {
+            return "宇宙到達";
+        }
     }
 }

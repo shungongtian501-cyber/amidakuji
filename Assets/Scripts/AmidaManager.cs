@@ -96,6 +96,9 @@ public class AmidaManager : MonoBehaviour
     private Text resultText;
 
     [SerializeField]
+    private GameObject HowtoStartText;
+
+    [SerializeField]
     private Text scoreText;
 
     private int score = 0;
@@ -242,6 +245,7 @@ public class AmidaManager : MonoBehaviour
     int index
 )
     {
+        HowtoStartText.SetActive(false);
         // ボタン無効化
         foreach (Button button in startButtons)
         {
@@ -1082,8 +1086,7 @@ public class AmidaManager : MonoBehaviour
             );
 
         scoreText.text =
-            "SCORE : "
-            + score;
+           score * 10 + "m";
     }
     void UpdateDifficulty()
     {
